@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { Fruit } = require("../models/index");
+const { validationResult } = require("express-validator");
+const { theFruitsCheck } = require("./validations");
 
 router
   .route("/")
@@ -8,12 +10,17 @@ router
     const allOfThem = await Fruit.findAll();
     res.json(allOfThem);
   })
-  .post(async (req, res) => {
-    const theData = req.body;
-    await Fruit.create(theData);
-    const allOfThem = await Fruit.findAll();
+  .post(theFruitsCheck, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({ error: errors.array() });
+    } else {
+      const theData = req.body;
+      await Fruit.create(theData);
+      const allOfThem = await Fruit.findAll();
 
-    res.json(allOfThem);
+      res.json(allOfThem);
+    }
   });
 
 router

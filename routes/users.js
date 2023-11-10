@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models/index");
+const { validationResult } = require("express-validator");
+const { theUsersCheck } = require("./validations");
 
 router.get("/", async (req, res) => {
   const theRes = await User.findAll();
@@ -14,12 +16,17 @@ router.get("/:id", async (req, res) => {
   res.json(theRes);
 });
 
-router.post("/", async (req, res) => {
-  const theData = req.body;
-  await User.create(theData);
-  const allOfThem = await User.findAll();
+router.post("/", theUsersCheck, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.json({ error: errors.array() });
+  } else {
+    const theData = req.body;
+    await User.create(theData);
+    const allOfThem = await User.findAll();
 
-  res.json(allOfThem);
+    res.json(allOfThem);
+  }
 });
 
 router.put("/:id", async (req, res) => {
