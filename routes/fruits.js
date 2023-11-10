@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { Fruit } = require("../models/index");
 const { validationResult } = require("express-validator");
-const { theFruitsCheck } = require("./validations");
+const { theFruitsCheck, fruitsPutCheck } = require("./validations");
 
 router
   .route("/")
@@ -30,13 +30,18 @@ router
     const theFruit = await Fruit.findByPk(theId);
     res.json(theFruit);
   })
-  .put(async (req, res) => {
-    const theId = req.params.id;
-    const theData = req.body;
-    await Fruit.update(theData, { where: { id: theId } });
-    const allOfThem = await Fruit.findAll();
+  .put(fruitsPutCheck, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.json({ error: errors.array() });
+    } else {
+      const theId = req.params.id;
+      const theData = req.body;
+      await Fruit.update(theData, { where: { id: theId } });
+      const allOfThem = await Fruit.findAll();
 
-    res.json(allOfThem);
+      res.json(allOfThem);
+    }
   })
   .delete(async (req, res) => {
     const theId = req.params.id;

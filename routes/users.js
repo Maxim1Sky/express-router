@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../models/index");
 const { validationResult } = require("express-validator");
-const { theUsersCheck } = require("./validations");
+const { theUsersCheck, usersPutCheck } = require("./validations");
 
 router.get("/", async (req, res) => {
   const theRes = await User.findAll();
@@ -29,13 +29,18 @@ router.post("/", theUsersCheck, async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
-  const theData = req.body;
-  const theId = req.params.id;
-  await User.update(theData, { where: { id: theId } });
-  const allOfThem = await User.findAll();
+router.put("/:id", usersPutCheck, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.json({ error: errors.array() });
+  } else {
+    const theData = req.body;
+    const theId = req.params.id;
+    await User.update(theData, { where: { id: theId } });
+    const allOfThem = await User.findAll();
 
-  res.json(allOfThem);
+    res.json(allOfThem);
+  }
 });
 
 router.delete("/:id", async (req, res) => {
