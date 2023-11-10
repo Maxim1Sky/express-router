@@ -22,4 +22,21 @@ router.post("/", async (req, res) => {
   res.json(allOfThem);
 });
 
+router.put("/:id", async (req, res) => {
+  const theData = req.body;
+  const theId = req.params.id;
+  await User.update(theData, { where: { id: theId } });
+  const allOfThem = await User.findAll();
+
+  res.json(allOfThem);
+});
+
+router.delete("/:id", async (req, res) => {
+  const theId = req.params.id;
+  await User.destroy({ where: { id: theId } });
+  const allOfThem = await User.findAll();
+
+  res.json(allOfThem);
+});
+
 module.exports = router;
